@@ -1,4 +1,7 @@
+mod lexer;
+
 use std::io::{ self, BufRead };
+use lexer::lexer;
 
 fn read_input() -> String {
     let mut line = String::new();
@@ -24,6 +27,11 @@ fn main() {
             break;
         } else if input == "help" {
             print_help();
+        }
+
+        let tokens = lexer(&input).unwrap();
+        for item in &tokens {
+            println!("{}", item);
         }
     }
 }
