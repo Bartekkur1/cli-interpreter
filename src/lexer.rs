@@ -5,16 +5,26 @@ pub enum Token {
     Value {
         value: String,
     },
-    Operation {
-        value: String,
+    Operator {
+        value: char,
     },
+}
+
+impl Token {
+    pub fn value(value: String) -> Self {
+        Token::Value { value }
+    }
+
+    pub fn operator(value: char) -> Self {
+        Token::Operator { value }
+    }
 }
 
 impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Token::Value { value } => write!(f, "Value: {}", value),
-            Token::Operation { value } => write!(f, "Operation: {}", value),
+            Token::Operator { value } => write!(f, "Operator: {}", value),
         }
     }
 }
@@ -32,7 +42,7 @@ pub fn lexer(input: &String) -> Result<Vec<Token>, String> {
                 tokens.push(Token::Value { value: mem.clone() });
                 mem = String::new();
             }
-            tokens.push(Token::Operation { value: c.to_string().clone() });
+            tokens.push(Token::Operator { value: c });
         } else {
             return Err(format!("Unrecognized char {}!", c));
         }
@@ -61,14 +71,19 @@ fn test_lexer_simple_value() {
 fn test_lexer_value_with_operator() {
     let input = String::from("1+");
     let tokens: Vec<Token> = lexer(&input).unwrap();
+
     assert_eq!(tokens.len(), 2);
-    if let Some(Token::Value { value }) = tokens.get(0) {
-        // assert!(true);
+    if let Token::Value { value } = &tokens[0] {
         assert_eq!(*value, String::from("1"));
+    } else {
+        panic!("Expected a Value token");
     }
-    if let Some(Token::Operation { value }) = tokens.get(0) {
-        // assert!(true);
-        assert_eq!(*value, String::from("+"));
+
+    if let Token::Operator { value } = &tokens[1] {
+        println!("{}", value);
+        assert_eq!(*value, '+');
+    } else {
+        panic!("Expected an Operator token");
     }
 }
 
@@ -77,13 +92,18 @@ fn test_lexer_simple_sentence() {
     let input = String::from("1+232+33*40");
     let tokens = lexer(&input).unwrap();
     assert_eq!(tokens.len(), 7);
-    if let Some(Token::Value { value }) = tokens.get(2) {
-        // assert!(true);
+
+    if let Token::Value { value } = &tokens[2] {
         assert_eq!(*value, String::from("232"));
+    } else {
+        panic!("Expected a Value token");
     }
-    if let Some(Token::Operation { value }) = tokens.get(5) {
-        // assert!(true);
-        assert_eq!(*value, String::from("*"));
+
+    if let Token::Operator { value } = &tokens[5] {
+        println!("{}", value);
+        assert_eq!(*value, '*');
+    } else {
+        panic!("Expected an Operator token");
     }
 }
 

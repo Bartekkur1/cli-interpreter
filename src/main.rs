@@ -1,4 +1,5 @@
 mod lexer;
+mod syntax_analysis;
 
 use std::io::{ self, BufRead };
 use lexer::lexer;
