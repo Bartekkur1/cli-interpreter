@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use regex::Regex;
 
 #[derive(Debug)]
@@ -55,7 +53,7 @@ fn test_lexer_simple_value() {
     assert_eq!(tokens.len(), 1);
     if let Some(Token::Value { value }) = tokens.get(0) {
         // assert!(true);
-        assert_eq!(value.deref(), expected_value);
+        assert_eq!(*value, expected_value);
     }
 }
 
@@ -66,11 +64,11 @@ fn test_lexer_value_with_operator() {
     assert_eq!(tokens.len(), 2);
     if let Some(Token::Value { value }) = tokens.get(0) {
         // assert!(true);
-        assert_eq!(value.deref(), String::from("1"));
+        assert_eq!(*value, String::from("1"));
     }
     if let Some(Token::Operation { value }) = tokens.get(0) {
         // assert!(true);
-        assert_eq!(value.deref(), String::from("+"));
+        assert_eq!(*value, String::from("+"));
     }
 }
 
@@ -81,11 +79,11 @@ fn test_lexer_simple_sentence() {
     assert_eq!(tokens.len(), 7);
     if let Some(Token::Value { value }) = tokens.get(2) {
         // assert!(true);
-        assert_eq!(value.deref(), String::from("232"));
+        assert_eq!(*value, String::from("232"));
     }
     if let Some(Token::Operation { value }) = tokens.get(5) {
         // assert!(true);
-        assert_eq!(value.deref(), String::from("*"));
+        assert_eq!(*value, String::from("*"));
     }
 }
 
