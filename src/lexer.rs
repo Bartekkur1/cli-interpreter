@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use regex::Regex;
 
 #[derive(Debug)]
@@ -44,4 +46,60 @@ pub fn lexer(input: &String) -> Result<Vec<Token>, String> {
 
     tokens.reverse();
     Ok(tokens)
+}
+
+#[test]
+fn test_lexer_simple_value() {
+    let expected_value = String::from("1");
+    let tokens = lexer(&expected_value).unwrap();
+    assert_eq!(tokens.len(), 1);
+    if let Some(Token::Value { value }) = tokens.get(0) {
+        // assert!(true);
+        assert_eq!(value.deref(), expected_value);
+    }
+}
+
+#[test]
+fn test_lexer_value_with_operator() {
+    let input = String::from("1+");
+    let tokens: Vec<Token> = lexer(&input).unwrap();
+    assert_eq!(tokens.len(), 2);
+    if let Some(Token::Value { value }) = tokens.get(0) {
+        // assert!(true);
+        assert_eq!(value.deref(), String::from("1"));
+    }
+    if let Some(Token::Operation { value }) = tokens.get(0) {
+        // assert!(true);
+        assert_eq!(value.deref(), String::from("+"));
+    }
+}
+
+#[test]
+fn test_lexer_simple_sentence() {
+    let input = String::from("1+232+33*40");
+    let tokens = lexer(&input).unwrap();
+    assert_eq!(tokens.len(), 7);
+    if let Some(Token::Value { value }) = tokens.get(2) {
+        // assert!(true);
+        assert_eq!(value.deref(), String::from("232"));
+    }
+    if let Some(Token::Operation { value }) = tokens.get(5) {
+        // assert!(true);
+        assert_eq!(value.deref(), String::from("*"));
+    }
+}
+
+#[test]
+fn test_empty_input() {
+    let input = String::from("");
+    let tokens = lexer(&input).unwrap();
+    assert_eq!(tokens.len(), 0);
+}
+
+#[test]
+fn test_should_fail_on_unrecognized_char() {
+    let input = String::from("B");
+    let tokens = lexer(&input);
+    assert!(tokens.is_err());
+    assert_eq!(tokens.unwrap_err(), "Unrecognized char B!");
 }
