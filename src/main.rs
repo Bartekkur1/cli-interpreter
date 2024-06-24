@@ -3,6 +3,7 @@ mod syntax_analysis;
 
 use std::io::{ self, BufRead };
 use lexer::lexer;
+use syntax_analysis::analyze_syntax;
 
 fn read_input() -> String {
     let mut line = String::new();
@@ -28,11 +29,12 @@ fn main() {
             break;
         } else if input == "help" {
             print_help();
-        }
-
-        let tokens = lexer(&input).unwrap();
-        for item in &tokens {
-            println!("{}", item);
+        } else {
+            let tokens = lexer(&input).unwrap();
+            let syntax_result = analyze_syntax(tokens);
+            if let Err(error) = syntax_result {
+                println!("Syntax Error! {}", error)
+            }
         }
     }
 }

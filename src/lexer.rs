@@ -10,6 +10,12 @@ pub enum Token {
     },
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum TokenVariant {
+    Value,
+    Operator,
+}
+
 impl Token {
     pub fn value(value: String) -> Self {
         Token::Value { value }
@@ -17,6 +23,22 @@ impl Token {
 
     pub fn operator(value: char) -> Self {
         Token::Operator { value }
+    }
+
+    pub fn variant(&self) -> TokenVariant {
+        match self {
+            Token::Value { .. } => TokenVariant::Value,
+            Token::Operator { .. } => TokenVariant::Operator,
+        }
+    }
+}
+
+impl std::fmt::Display for TokenVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            TokenVariant::Value => write!(f, "Value"),
+            TokenVariant::Operator => write!(f, "Operator"),
+        }
     }
 }
 
