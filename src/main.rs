@@ -1,7 +1,9 @@
 mod lexer;
 mod syntax_analysis;
+mod execute;
 
 use std::io::{ self, BufRead };
+use execute::execute;
 use lexer::lexer;
 use syntax_analysis::analyze_syntax;
 
@@ -17,6 +19,7 @@ fn read_input() -> String {
 
 fn print_help() {
     println!("- To exit type 'exit'");
+    println!("This interpreter handles basic math operations (*/+-) with given numbers");
 }
 
 fn main() {
@@ -31,10 +34,12 @@ fn main() {
             print_help();
         } else {
             let tokens = lexer(&input).unwrap();
-            let syntax_result = analyze_syntax(tokens);
+            let syntax_result = analyze_syntax(&tokens);
             if let Err(error) = syntax_result {
-                println!("Syntax Error! {}", error)
+                println!("Syntax Error! {}", error);
             }
+            let result = execute(tokens);
+            println!("Result: {}", result);
         }
     }
 }

@@ -1,12 +1,15 @@
+use core::panic;
+
 use regex::Regex;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Token {
     Value {
         value: String,
     },
     Operator {
-        value: char,
+        value: String,
+        score: u8,
     },
 }
 
@@ -16,19 +19,57 @@ pub enum TokenVariant {
     Operator,
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum OperatorVariant {
+    Mul,
+    Div,
+    Add,
+    Sub,
+}
+
 impl Token {
     pub fn value(value: String) -> Self {
         Token::Value { value }
     }
 
-    pub fn operator(value: char) -> Self {
-        Token::Operator { value }
+    pub fn operator(value: String, score: u8) -> Self {
+        Token::Operator { value, score }
     }
 
     pub fn variant(&self) -> TokenVariant {
         match self {
             Token::Value { .. } => TokenVariant::Value,
             Token::Operator { .. } => TokenVariant::Operator,
+        }
+    }
+
+    pub fn operator_variant(&self) -> OperatorVariant {
+        match self {
+            Token::Operator { value, .. } => {
+                match value.as_str() {
+                    "*" => OperatorVariant::Mul,
+                    "/" => OperatorVariant::Div,
+                    "+" => OperatorVariant::Add,
+                    "-" => OperatorVariant::Sub,
+                    _ => panic!("Unknown operator!"),
+                }
+            }
+            // Handle other token variants if necessary
+            _ => panic!("Expected an operator token!"),
+        }
+    }
+
+    pub fn token_value(&self) -> &str {
+        match self {
+            Token::Value { value } => value,
+            Token::Operator { value, score: _ } => value,
+        }
+    }
+
+    pub fn score(&self) -> &u8 {
+        match self {
+            Token::Operator { value: _, score } => score,
+            Token::Value { value: _ } => &0,
         }
     }
 }
@@ -46,8 +87,16 @@ impl std::fmt::Display for Token {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             Token::Value { value } => write!(f, "Value: {}", value),
-            Token::Operator { value } => write!(f, "Operator: {}", value),
+            Token::Operator { value, score } => write!(f, "Operator: {} Score: {}", value, score),
         }
+    }
+}
+
+fn get_token_score(token: &String) -> u8 {
+    if *token == String::from("*") || *token == String::from("/") {
+        return 1;
+    } else {
+        return 0;
     }
 }
 
@@ -64,7 +113,9 @@ pub fn lexer(input: &String) -> Result<Vec<Token>, String> {
                 tokens.push(Token::Value { value: mem.clone() });
                 mem = String::new();
             }
-            tokens.push(Token::Operator { value: c });
+            let c = c.to_string();
+            let token_score = get_token_score(&c);
+            tokens.push(Token::Operator { value: c, score: token_score });
         } else {
             return Err(format!("Unrecognized char {}!", c));
         }
@@ -101,9 +152,9 @@ fn test_lexer_value_with_operator() {
         panic!("Expected a Value token");
     }
 
-    if let Token::Operator { value } = &tokens[1] {
+    if let Token::Operator { value, score: 0 } = &tokens[1] {
         println!("{}", value);
-        assert_eq!(*value, '+');
+        assert_eq!(*value, "+");
     } else {
         panic!("Expected an Operator token");
     }
@@ -121,9 +172,9 @@ fn test_lexer_simple_sentence() {
         panic!("Expected a Value token");
     }
 
-    if let Token::Operator { value } = &tokens[5] {
+    if let Token::Operator { value, score: 1 } = &tokens[5] {
         println!("{}", value);
-        assert_eq!(*value, '*');
+        assert_eq!(*value, "*");
     } else {
         panic!("Expected an Operator token");
     }

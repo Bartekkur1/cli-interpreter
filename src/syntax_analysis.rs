@@ -1,6 +1,6 @@
 use crate::lexer::{ Token, TokenVariant };
 
-pub fn analyze_syntax(tokens: Vec<Token>) -> Result<(), String> {
+pub fn analyze_syntax(tokens: &Vec<Token>) -> Result<(), String> {
     let mut i: i32 = 0;
     while i < (tokens.len() as i32) {
         let cursor = tokens.get(i as usize).unwrap();
@@ -58,10 +58,10 @@ pub fn analyze_syntax(tokens: Vec<Token>) -> Result<(), String> {
 #[test]
 fn test_should_error_on_missing_next_operation_value() {
     let mut tokens: Vec<Token> = Vec::new();
-    tokens.push(Token::Value { value: String::from("1") });
-    tokens.push(Token::Operator { value: '*' });
+    tokens.push(Token::value("1".to_string()));
+    tokens.push(Token::operator("*".to_string(), 1));
 
-    let syntax_result = analyze_syntax(tokens);
+    let syntax_result = analyze_syntax(&tokens);
     assert!(syntax_result.is_err());
     assert_eq!(syntax_result.unwrap_err(), "Syntax Error! Operator missing value at position 2");
 }
@@ -69,10 +69,10 @@ fn test_should_error_on_missing_next_operation_value() {
 #[test]
 fn test_should_error_on_missing_next_operation_value_reverse() {
     let mut tokens: Vec<Token> = Vec::new();
-    tokens.push(Token::Operator { value: '*' });
-    tokens.push(Token::Value { value: String::from("1") });
+    tokens.push(Token::operator("*".to_string(), 1));
+    tokens.push(Token::value("1".to_string()));
 
-    let syntax_result = analyze_syntax(tokens);
+    let syntax_result = analyze_syntax(&tokens);
     assert!(syntax_result.is_err());
     assert_eq!(syntax_result.unwrap_err(), "Syntax Error! Operator missing value at position -1");
 }
@@ -80,10 +80,10 @@ fn test_should_error_on_missing_next_operation_value_reverse() {
 #[test]
 fn test_should_error_on_missing_prev_operation_value() {
     let mut tokens: Vec<Token> = Vec::new();
-    tokens.push(Token::Operator { value: '*' });
-    tokens.push(Token::Value { value: String::from("1") });
+    tokens.push(Token::operator("*".to_string(), 1));
+    tokens.push(Token::value("1".to_string()));
 
-    let syntax_result = analyze_syntax(tokens);
+    let syntax_result = analyze_syntax(&tokens);
     assert!(syntax_result.is_err());
     assert_eq!(syntax_result.unwrap_err(), "Syntax Error! Operator missing value at position -1");
 }
@@ -91,11 +91,11 @@ fn test_should_error_on_missing_prev_operation_value() {
 #[test]
 fn test_should_error_on_invalid_command() {
     let mut tokens: Vec<Token> = Vec::new();
-    tokens.push(Token::Value { value: String::from("1") });
-    tokens.push(Token::Operator { value: '*' });
-    tokens.push(Token::Operator { value: '*' });
+    tokens.push(Token::value("1".to_string()));
+    tokens.push(Token::operator("*".to_string(), 1));
+    tokens.push(Token::operator("*".to_string(), 1));
 
-    let syntax_result = analyze_syntax(tokens);
+    let syntax_result = analyze_syntax(&tokens);
     assert!(syntax_result.is_err());
     assert_eq!(
         syntax_result.unwrap_err(),
@@ -106,9 +106,9 @@ fn test_should_error_on_invalid_command() {
 #[test]
 fn test_should_fail_on_missing_operator() {
     let mut tokens: Vec<Token> = Vec::new();
-    tokens.push(Token::Value { value: String::from("11") });
+    tokens.push(Token::value("1".to_string()));
 
-    let syntax_result = analyze_syntax(tokens);
+    let syntax_result = analyze_syntax(&tokens);
     assert!(syntax_result.is_err());
     assert_eq!(
         syntax_result.unwrap_err(),
